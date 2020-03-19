@@ -1,42 +1,19 @@
-import fetch from 'cross-fetch'
+import axios from 'axios';
 
-export const REQ_CHAR = 'REQ_CHAR'
-function reqChar(gameofthrones) {
-    return {
-        type: REQ_CHAR,
-        gameofthrones
-    }
-}
+export const FETCH_DATA = 'FETCH_DATA';
+export const UPDATE_DATA = 'UPDATE_DATA';
+export const SET_ERROR = 'SET_ERROR';
 
-export const REC_CHAR = 'REC_CHAR'
-function recChar(gameofthrones, json) {
-    return {
-        type: REC_CHAR,
-        gameofthrones,
-        char: json.data.children.map(child => child.data),
-        receivedAt: Date.now()
-    }
-}
-
-export const INVALIDATE_GAMEOFTHRONES = 'INALIDATE_GAMEOFTHRONES'
-export function invalidateGameofthrones(gameofthrones) {
-    return {
-        type: INVALIDATE_GAMEOFTHRONES,
-        gameofthrones
-    }
-}
-
-export function fetchChar(gameofthrones) {
-    return function(dispatch) {
-        dispatch(reqChar(gameofthrones))
-
-        return fetch(`https://anapioficeandfire.com/api/characters/${gameofthrones}.json`)
-            .then(
-                res => res.json(),
-                err => console.log('An error occured.', error)
-            )
-            .then(json =>
-                dispatch(recChar(gameofthrones, json))
-            )
-    }
-}
+export const getData = () => dispatch => {
+  dispatch({ type: FETCH_DATA });
+  axios
+    .get('https://api.pokemontcg.io/v1/cards')
+    .then(response => {
+      console.log(response);
+      dispatch({ type: UPDATE_DATA, payload: response.data.cards });
+    })
+    .catch(err => {
+      console.error('Error fetching data from api: ', err);
+      dispatch({ type: SET_ERROR, payload: 'Error fetching data from api' });
+    });
+};
